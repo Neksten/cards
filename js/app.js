@@ -5,7 +5,8 @@ function autoSlider(card, slides, dots, arrows) {
 	if (card.classList.contains('auto')) {
 		// Проверка является ли активный слайд поумолчанию первым либо последним
 		arrowEndDelOrAdd(numberActiveElement(slides), slides, arrows)
-		setInterval(() => {
+		
+		function autoPlay() {
 			let activeSlide = numberActiveElement(slides) + 1
 			clearActiveClasses(slides, dots)
 			arrowEndDelOrAdd(activeSlide, slides, arrows)
@@ -25,7 +26,36 @@ function autoSlider(card, slides, dots, arrows) {
 					dots[0].classList.add('_active')
 				}
 			}
-		}, 3000);
+		}
+		
+		let interval = setInterval(autoPlay, 3000)
+		
+		function stopSetInterval(element) {
+			// клик на элемент
+			element.addEventListener('click', () => {
+				clearInterval(interval)
+				interval = setInterval(autoPlay, 3000)
+			})
+			slides.forEach(slide => {
+				slide.addEventListener('click', () => {
+					clearInterval(interval)
+					interval = setInterval(autoPlay, 3000)
+				})
+			})
+		}
+		
+		slides.forEach(slide => {
+			// клик на слайдер
+			stopSetInterval(slide)
+		})
+		arrows.forEach(arrow => {
+			// клик на стрелку
+			stopSetInterval(arrow)
+		})
+		dots.forEach(dot => {
+			// клик на точку
+			stopSetInterval(dot)
+		})
 	}
 }
 
@@ -35,13 +65,13 @@ function arrowsAdd(card) {
 	if (card.classList.contains('arrows')) {
 		// Добавить левую стрелку
 		let arrowDivLeft = document.createElement('div')
-		arrowDivLeft.innerHTML = `<img src="./img/arrow-left.png" alt="">`
+		arrowDivLeft.innerHTML = `<img src="./img/arrow-left.svg" alt="" oncontextmenu="return false">`
 		arrowDivLeft.classList.add('cards__arrow-left', 'cards__arrow')
 		card.prepend(arrowDivLeft)
 		
 		// Добавить правую стрелку
 		let arrowDivRight = document.createElement('div')
-		arrowDivRight.innerHTML = `<img src="./img/arrow-right.png" alt="">`
+		arrowDivRight.innerHTML = `<img src="./img/arrow-right.svg" alt="" oncontextmenu="return false">`
 		arrowDivRight.classList.add('cards__arrow-right', 'cards__arrow')
 		card.append(arrowDivRight)
 	}
@@ -103,7 +133,7 @@ function arrowEndDelOrAdd(active, slides, arrows) {
 	}
 }
 
-function sliders(card, slides) {
+function sliders(card, slides, cardContainer) {
 	let arrows
 	// Если есть стрелки
 	if (card.classList.contains('arrows')) {
@@ -164,7 +194,7 @@ function sliders(card, slides) {
 		})
 	}
 	if (card.classList.contains('auto')) {
-		autoSlider(card, slides, dots, arrows)
+		autoSlider(card, slides, dots, arrows, cardContainer)
 	}
 	// Проходимся по всем слайдам
 	slides.forEach((slide) => {
@@ -180,15 +210,15 @@ function sliders(card, slides) {
 			}
 		})
 	})
-	
 }
 
 function createSlider(card) {
+	const cardContainer = card.querySelector('.cards__container')
 	const slides = card.querySelectorAll('.card__slide')
 	let activeSlideIndex = numberActiveElement(slides)
 	arrowsAdd(card)
 	dotsAdd(card, activeSlideIndex)
-	sliders(card, slides, activeSlideIndex)
+	sliders(card, slides, cardContainer)
 }
 
 cards.forEach(card => createSlider(card))
